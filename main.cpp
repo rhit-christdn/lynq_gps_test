@@ -105,7 +105,6 @@ int main()
                 }
             }
             lynq1Printed = false; // Clear printed flag for next iteration
-            buffer1.clear(); // Clear buffer after processing
         }
 
         if (m > 0)
@@ -139,7 +138,6 @@ int main()
                 }
             }
             lynq2Printed = false; // Clear printed flag for next iteration
-            buffer2.clear(); // Clear buffer after processing
         }
 
 
