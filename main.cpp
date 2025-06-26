@@ -69,6 +69,10 @@ int main()
         int n = read(serialPort1, chunk1, sizeof(chunk1) - 1);
         int m = read(serialPort2, chunk2, sizeof(chunk2) - 1);
 
+        bool gotLat1 = false, gotLat2 = false;
+        double lat1 = 0.0, lon1 = 0.0;
+        double lat2 = 0.0, lon2 = 0.0;
+
         if (n > 0)
         {
             chunk1[n] = '\0';
@@ -86,6 +90,7 @@ int main()
                     json j = json::parse(message);
                     if (j.contains("lat") && j.contains("long"))
                     {
+                        gotLat1 = true;
                         double lat1 = j["lat"];
                         double lon1 = j["long"];
                         std::cout << "Latitude 1: " << std::setprecision(10) << lat1
@@ -116,6 +121,7 @@ int main()
                     json j = json::parse(message);
                     if (j.contains("lat") && j.contains("long"))
                     {
+                        gotLat2 = true;
                         double lat2 = j["lat"];
                         double lon2 = j["long"];
                         std::cout << "Latitude 2: " << std::setprecision(10) << lat2
@@ -130,7 +136,7 @@ int main()
         }
 
 
-        if (n > 0 && m > 0)
+        if (gotLat1 && gotLat2)
         {
             std::cout << "Average Value.\n";
 
