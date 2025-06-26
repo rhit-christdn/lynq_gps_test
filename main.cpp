@@ -86,10 +86,10 @@ int main()
                     json j = json::parse(message);
                     if (j.contains("lat") && j.contains("long"))
                     {
-                        double lat = j["lat"];
-                        double lon = j["long"];
-                        std::cout << "Latitude 1: " << std::setprecision(10) << lat
-                                  << ", Longitude 1: " << std::setprecision(10) << lon << "\n";
+                        double lat1 = j["lat"];
+                        double lon1 = j["long"];
+                        std::cout << "Latitude 1: " << std::setprecision(10) << lat1
+                                  << ", Longitude 1: " << std::setprecision(10) << lon1 << "\n";
                     }
                 }
                 catch (json::parse_error &e)
@@ -116,10 +116,10 @@ int main()
                     json j = json::parse(message);
                     if (j.contains("lat") && j.contains("long"))
                     {
-                        double lat = j["lat"];
-                        double lon = j["long"];
-                        std::cout << "Latitude 2: " << std::setprecision(10) << lat
-                                  << ", Longitude 2: " << std::setprecision(10) << lon << "\n";
+                        double lat2 = j["lat"];
+                        double lon2 = j["long"];
+                        std::cout << "Latitude 2: " << std::setprecision(10) << lat2
+                                  << ", Longitude 2: " << std::setprecision(10) << lon2 << "\n";
                     }
                 }
                 catch (json::parse_error &e)
@@ -127,6 +127,19 @@ int main()
                     std::cerr << "JSON parse error (2): " << e.what() << "\n";
                 }
             }
+        }
+
+
+        if (n > 0 && m > 0)
+        {
+            std::cout << "Average Value.\n";
+
+            double avgLat = (lat1 + lat2) / 2.0;
+            double avgLon = (lon1 + lon2) / 2.0;
+            std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
+            std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
+
+            std::cout << "\n";
         }
     }
 
