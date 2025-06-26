@@ -113,7 +113,7 @@ int main()
 
             // Parse all complete JSON messages
             size_t end;
-            while ((end = buffer2.find('}')) != std::string::npos || lynq2Printed)
+            while ((end = buffer2.find('}')) != std::string::npos && !lynq2Printed)
             {
                 std::string message = buffer2.substr(0, end + 1);
                 buffer2.erase(0, end + 1);
