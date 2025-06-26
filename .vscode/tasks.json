@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build serial reader",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "main.cpp",
+        "-o",
+        "serial_reader.exe"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
