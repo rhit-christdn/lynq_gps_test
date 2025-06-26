@@ -1,69 +1,73 @@
-#include <windows.h>
 #include <iostream>
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
+#include <cstring>
 
 int main() {
-    LPCWSTR portName = L"\\\\.\\COM4"; // Change COM port here
+    const char* portName = "/dev/ttyACM0"; // Change to your actual serial port
+    int serialPort = open(portName, O_RDONLY | O_NOCTTY);
 
-    HANDLE hSerial = CreateFileW(portName, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
-    if (hSerial == INVALID_HANDLE_VALUE) {
+    if (serialPort < 0) {
         std::cerr << "Error opening serial port\n";
         return 1;
     }
 
-    DCB dcbSerialParams = { 0 };
-    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+    struct termios tty;
+    memset(&tty, 0, sizeof tty);
 
-    if (!GetCommState(hSerial, &dcbSerialParams)) {
-        std::cerr << "Failed to get current serial parameters\n";
-        CloseHandle(hSerial);
+    if (tcgetattr(serialPort, &tty) != 0) {
+        std::cerr << "Error getting serial attributes\n";
+        close(serialPort);
         return 1;
     }
 
-    dcbSerialParams.BaudRate = CBR_9600;
-    dcbSerialParams.ByteSize = 8;
-    dcbSerialParams.StopBits = ONESTOPBIT;
-    dcbSerialParams.Parity   = NOPARITY;
+    // Set baud rate and serial settings
+    cfsetospeed(&tty, B9600);
+    cfsetispeed(&tty, B9600);
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
+    tty.c_cflag |= (CLOCAL | CREAD);            // Enable receiver, no modem control
+    tty.c_cflag &= ~(PARENB | PARODD);          // No parity
+    tty.c_cflag &= ~CSTOPB;                     // One stop bit
+    tty.c_cflag &= ~CRTSCTS;                    // No flow control
+    tty.c_iflag = 0;
+    tty.c_lflag = 0;
+    tty.c_oflag = 0;
+    tty.c_cc[VMIN] = 1;  // Read blocks until at least 1 byte is available
+    tty.c_cc[VTIME] = 0;
 
-    if (!SetCommState(hSerial, &dcbSerialParams)) {
-        std::cerr << "Failed to set serial parameters\n";
-        CloseHandle(hSerial);
+    if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
+        std::cerr << "Error setting serial attributes\n";
+        close(serialPort);
         return 1;
     }
 
-    COMMTIMEOUTS timeouts = { 0 };
-    timeouts.ReadIntervalTimeout         = 50;
-    timeouts.ReadTotalTimeoutConstant    = 50;
-    timeouts.ReadTotalTimeoutMultiplier  = 10;
-
-    SetCommTimeouts(hSerial, &timeouts);
-
-    char buffer[128];
-    DWORD bytesRead;
-
+    // Main read loop
+    char buffer[256];
     while (true) {
-        if (ReadFile(hSerial, buffer, sizeof(buffer) - 1, &bytesRead, NULL)) {
-            if (bytesRead > 0) {
-                buffer[bytesRead] = '\0';
+        int bytesRead = read(serialPort, buffer, sizeof(buffer) - 1);
+        if (bytesRead > 0) {
+            buffer[bytesRead] = '\0';
+            std::cout << buffer;
 
-                char* latPtr = strstr(buffer, "\"lat\"");
-                char* lonPtr = strstr(buffer, "\"long\"");
+            char* latPtr = strstr(buffer, "\"lat\"");
+            char* lonPtr = strstr(buffer, "\"long\"");
 
+            if (latPtr && lonPtr) {
                 double latitude, longitude;
 
-                // Extract numbers using sscanf
-                sscanf(latPtr, "\"lat\" : %lf", &latitude);
-                sscanf(lonPtr, "\"long\" : %lf", &longitude);
-
-                std::cout << "Latitude: " << latitude << "\n";
-                std::cout << "Longitude: " << longitude << "\n";
+                if (sscanf(latPtr, "\"lat\" : %lf", &latitude) == 1 &&
+                    sscanf(lonPtr, "\"long\" : %lf", &longitude) == 1) {
+                    std::cout << "Latitude: " << latitude << "\n";
+                    std::cout << "Longitude: " << longitude << "\n";
+                }
             }
         } else {
-            std::cerr << "Read error\n";
+            std::cerr << "Read error or disconnect\n";
             break;
         }
     }
 
-    CloseHandle(hSerial);
+    close(serialPort);
     return 0;
-
 }
