@@ -96,6 +96,7 @@ int main()
                         lon1 = j["long"];
                         std::cout << "Latitude 1: " << std::setprecision(10) << lat1
                                   << ", Longitude 1: " << std::setprecision(10) << lon1 << "\n";
+                        lynq1Printed = true; // Mark as printed
                     }
                 }
                 catch (json::parse_error &e)
@@ -103,6 +104,7 @@ int main()
                     std::cerr << "JSON parse error (1): " << e.what() << "\n";
                 }
             }
+            lynq1Printed = false; // Clear printed flag for next iteration
             buffer1.clear(); // Clear buffer after processing
         }
 
@@ -128,6 +130,7 @@ int main()
                         lon2 = j["long"];
                         std::cout << "Latitude 2: " << std::setprecision(10) << lat2
                                   << ", Longitude 2: " << std::setprecision(10) << lon2 << "\n";
+                        lynq2Printed = true; // Mark as printed
                     }
                 }
                 catch (json::parse_error &e)
@@ -135,6 +138,7 @@ int main()
                     std::cerr << "JSON parse error (2): " << e.what() << "\n";
                 }
             }
+            lynq2Printed = false; // Clear printed flag for next iteration
             buffer2.clear(); // Clear buffer after processing
         }
 
