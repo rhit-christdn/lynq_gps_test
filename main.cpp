@@ -92,8 +92,8 @@ int main()
                     if (j.contains("lat") && j.contains("long") && !lynq1Printed)
                     {
                         gotLat1 = true;
-                        double lat1 = j["lat"];
-                        double lon1 = j["long"];
+                        lat1 = j["lat"];
+                        lon1 = j["long"];
                         std::cout << "Latitude 1: " << std::setprecision(10) << lat1
                                   << ", Longitude 1: " << std::setprecision(10) << lon1 << "\n";
                     }
@@ -143,8 +143,8 @@ int main()
         {
             std::cout << "Average Value.\n";
 
-            avgLat = (lat1 + lat2) / 2.0;
-            avgLon = (lon1 + lon2) / 2.0;
+            double avgLat = (lat1 + lat2) / 2.0;
+            double avgLon = (lon1 + lon2) / 2.0;
             std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
             std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
         }
