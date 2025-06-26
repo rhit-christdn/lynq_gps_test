@@ -70,6 +70,7 @@ int main()
         int m = read(serialPort2, chunk2, sizeof(chunk2) - 1);
 
         bool gotLat1 = false, gotLat2 = false;
+        bool lynq1Printed = false, lynq2Printed = false;
         double lat1 = 0.0, lon1 = 0.0;
         double lat2 = 0.0, lon2 = 0.0;
 
@@ -80,7 +81,7 @@ int main()
 
             // Parse all complete JSON messages
             size_t end;
-            while ((end = buffer1.find('}')) != std::string::npos)
+            while ((end = buffer1.find('}')) != std::string::npos || lynq1Printed)
             {
                 std::string message = buffer1.substr(0, end + 1);
                 buffer1.erase(0, end + 1);
@@ -95,6 +96,8 @@ int main()
                         double lon1 = j["long"];
                         std::cout << "Latitude 1: " << std::setprecision(10) << lat1
                                   << ", Longitude 1: " << std::setprecision(10) << lon1 << "\n";
+
+                        lynq1Printed = true;
                     }
                 }
                 catch (json::parse_error &e)
@@ -102,6 +105,7 @@ int main()
                     std::cerr << "JSON parse error (1): " << e.what() << "\n";
                 }
             }
+            lynq1Printed = false; // Reset for next iteration
         }
 
         if (m > 0)
@@ -111,7 +115,7 @@ int main()
 
             // Parse all complete JSON messages
             size_t end;
-            while ((end = buffer2.find('}')) != std::string::npos)
+            while ((end = buffer2.find('}')) != std::string::npos || lynq2Printed)
             {
                 std::string message = buffer2.substr(0, end + 1);
                 buffer2.erase(0, end + 1);
@@ -126,6 +130,8 @@ int main()
                         double lon2 = j["long"];
                         std::cout << "Latitude 2: " << std::setprecision(10) << lat2
                                   << ", Longitude 2: " << std::setprecision(10) << lon2 << "\n";
+
+                        lynq2Printed = true;
                     }
                 }
                 catch (json::parse_error &e)
@@ -133,6 +139,7 @@ int main()
                     std::cerr << "JSON parse error (2): " << e.what() << "\n";
                 }
             }
+            lynq2Printed = false; // Reset for next iteration
         }
 
 
@@ -144,9 +151,10 @@ int main()
             double avgLon = (lon1 + lon2) / 2.0;
             std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
             std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
-
-            std::cout << "\n";
         }
+
+        
+        std::cout << "\n";
     }
 
     close(serialPort1);
