@@ -9,29 +9,25 @@
 using json = nlohmann::json;
 
 int main() {
-    const char* portName1 = "/dev/ttyACM0"; // Adjust as needed
-    const char* portName2 = "/dev/ttyACM1"; // Adjust as needed
+    const char* portName1 = "/dev/ttyACM0";
+    const char* portName2 = "/dev/ttyACM1";
+
     int serialPort1 = open(portName1, O_RDONLY | O_NOCTTY);
     int serialPort2 = open(portName2, O_RDONLY | O_NOCTTY);
 
     if (serialPort1 < 0) {
-        std::cerr << "Error opening serial port\n";
+        std::cerr << "Error opening serial port 1\n";
         return 1;
     }
     if (serialPort2 < 0) {
-        std::cerr << "Error opening serial port\n";
+        std::cerr << "Error opening serial port 2\n";
         return 1;
     }
 
     struct termios tty{};
     if (tcgetattr(serialPort1, &tty) != 0) {
-        std::cerr << "Error getting serial attributes\n";
+        std::cerr << "Error getting serial attributes for port 1\n";
         close(serialPort1);
-        return 1;
-    }
-    if (tcgetattr(serialPort2, &tty) != 0) {
-        std::cerr << "Error getting serial attributes\n";
-        close(serialPort2);
         return 1;
     }
 
@@ -49,31 +45,31 @@ int main() {
     tty.c_cc[VTIME] = 0;
 
     if (tcsetattr(serialPort1, TCSANOW, &tty) != 0) {
-        std::cerr << "Error setting serial attributes\n";
+        std::cerr << "Error setting serial attributes for port 1\n";
         close(serialPort1);
         return 1;
     }
     if (tcsetattr(serialPort2, TCSANOW, &tty) != 0) {
-        std::cerr << "Error setting serial attributes\n";
+        std::cerr << "Error setting serial attributes for port 2\n";
         close(serialPort2);
         return 1;
     }
 
-    std::string buffer;
-    char chunk[256];
+    std::string buffer1, buffer2;
+    char chunk1[256], chunk2[256];
 
     while (true) {
-        int n = read(serialPort1, chunk, sizeof(chunk) - 1);\
-        int m = read(serialPort2, chunk, sizeof(chunk) - 1);
-        if (n > 0) {
-            chunk[n] = '\0';
-            buffer += chunk;
+        int n = read(serialPort1, chunk1, sizeof(chunk1) - 1);
+        int m = read(serialPort2, chunk2, sizeof(chunk2) - 1);
 
-            // Attempt to find a complete JSON object ending with }
-            size_t end = buffer.find('}');
+        if (n > 0) {
+            chunk1[n] = '\0';
+            buffer1 += chunk1;
+
+            size_t end = buffer1.find('}');
             if (end != std::string::npos) {
-                std::string message = buffer.substr(0, end + 1);
-                buffer.erase(0, end + 1);
+                std::string message = buffer1.substr(0, end + 1);
+                buffer1.erase(0, end + 1);
 
                 try {
                     json j = json::parse(message);
@@ -91,21 +87,21 @@ int main() {
         }
 
         if (m > 0) {
-            chunk[m] = '\0';
-            buffer += chunk;
-            // Attempt to find a complete JSON object ending with }
-            size_t end = buffer.find('}');
+            chunk2[m] = '\0';
+            buffer2 += chunk2;
+
+            size_t end = buffer2.find('}');
             if (end != std::string::npos) {
-                std::string message = buffer.substr(0, end + 1);
-                buffer.erase(0, end + 1);
+                std::string message = buffer2.substr(0, end + 1);
+                buffer2.erase(0, end + 1);
+
                 try {
                     json j = json::parse(message);
                     if (j.contains("lat") && j.contains("long")) {
                         double lat = j["lat"];
                         double lon = j["long"];
                         std::cout << "Latitude 2: " << lat << ", Longitude 2: " << lon << "\n";
-                    }
-                    else {
+                    } else {
                         std::cerr << "Missing lat/long in JSON\n";
                     }
                 } catch (json::parse_error& e) {
