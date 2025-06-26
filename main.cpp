@@ -81,7 +81,7 @@ int main()
 
             // Parse all complete JSON messages
             size_t end;
-            while ((end = buffer1.find('}')) != std::string::npos || lynq1Printed)
+            while ((end = buffer1.find('}')) != std::string::npos)
             {
                 std::string message = buffer1.substr(0, end + 1);
                 buffer1.erase(0, end + 1);
@@ -89,15 +89,13 @@ int main()
                 try
                 {
                     json j = json::parse(message);
-                    if (j.contains("lat") && j.contains("long"))
+                    if (j.contains("lat") && j.contains("long") && !lynq1Printed)
                     {
                         gotLat1 = true;
                         double lat1 = j["lat"];
                         double lon1 = j["long"];
                         std::cout << "Latitude 1: " << std::setprecision(10) << lat1
                                   << ", Longitude 1: " << std::setprecision(10) << lon1 << "\n";
-
-                        lynq1Printed = true;
                     }
                 }
                 catch (json::parse_error &e)
@@ -105,7 +103,7 @@ int main()
                     std::cerr << "JSON parse error (1): " << e.what() << "\n";
                 }
             }
-            lynq1Printed = false; // Reset for next iteration
+            buffer1.clear(); // Clear buffer after processing
         }
 
         if (m > 0)
@@ -123,15 +121,13 @@ int main()
                 try
                 {
                     json j = json::parse(message);
-                    if (j.contains("lat") && j.contains("long"))
+                    if (j.contains("lat") && j.contains("long") && !lynq2Printed)
                     {
                         gotLat2 = true;
-                        double lat2 = j["lat"];
-                        double lon2 = j["long"];
+                        lat2 = j["lat"];
+                        lon2 = j["long"];
                         std::cout << "Latitude 2: " << std::setprecision(10) << lat2
                                   << ", Longitude 2: " << std::setprecision(10) << lon2 << "\n";
-
-                        lynq2Printed = true;
                     }
                 }
                 catch (json::parse_error &e)
@@ -139,7 +135,7 @@ int main()
                     std::cerr << "JSON parse error (2): " << e.what() << "\n";
                 }
             }
-            lynq2Printed = false; // Reset for next iteration
+            buffer2.clear(); // Clear buffer after processing
         }
 
 
@@ -147,8 +143,8 @@ int main()
         {
             std::cout << "Average Value.\n";
 
-            double avgLat = (lat1 + lat2) / 2.0;
-            double avgLon = (lon1 + lon2) / 2.0;
+            avgLat = (lat1 + lat2) / 2.0;
+            avgLon = (lon1 + lon2) / 2.0;
             std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
             std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
         }
