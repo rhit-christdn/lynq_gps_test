@@ -11,21 +11,15 @@ using json = nlohmann::json;
 int main()
 {
     const char *portName1 = "/dev/ttyACM0";
-    const char *portName2 = "/dev/ttyACM1";
 
     int serialPort1 = open(portName1, O_RDONLY | O_NOCTTY);
-    int serialPort2 = open(portName2, O_RDONLY | O_NOCTTY);
 
     if (serialPort1 < 0)
     {
         std::cerr << "Error opening serial port 1\n";
         return 1;
     }
-    if (serialPort2 < 0)
-    {
-        std::cerr << "Error opening serial port 2\n";
-        return 1;
-    }
+
 
     struct termios tty{};
     if (tcgetattr(serialPort1, &tty) != 0)
@@ -54,25 +48,17 @@ int main()
         close(serialPort1);
         return 1;
     }
-    if (tcsetattr(serialPort2, TCSANOW, &tty) != 0)
-    {
-        std::cerr << "Error setting serial attributes for port 2\n";
-        close(serialPort2);
-        return 1;
-    }
 
-    std::string buffer1, buffer2;
-    char chunk1[256], chunk2[256];
+    std::string buffer1;
+    char chunk1[256];
 
     while (true)
     {
         int n = read(serialPort1, chunk1, sizeof(chunk1) - 1);
-        int m = read(serialPort2, chunk2, sizeof(chunk2) - 1);
 
-        bool gotLat1 = false, gotLat2 = false;
-        bool lynq1Printed = false, lynq2Printed = false;
+        bool lynq1Printed = false;
         double lat1 = 0.0, lon1 = 0.0;
-        double lat2 = 0.0, lon2 = 0.0;
+        char[64] identity1;
 
         if (n > 0)
         {
@@ -89,14 +75,14 @@ int main()
                 try
                 {
                     json j = json::parse(message);
-                    if (j.contains("lat") && j.contains("long") && !lynq1Printed)
+                    if (j.contains("identity") && j.contains("lat") && j.contains("long") && !lynq1Printed)
                     {
-                        gotLat1 = true;
+                        identity1 = j["identity"].get<std::string>();
                         lat1 = j["lat"];
                         lon1 = j["long"];
-                        std::cout << "Latitude 1: " << std::setprecision(10) << lat1
-                                  << ", Longitude 1: " << std::setprecision(10) << lon1 << "\n";
-                        lynq1Printed = true; // Mark as printed
+                        std::cout << "identity 1: " << identity1
+                                  << "Latitude 1: " << lat1
+                                  << ", Longitude 1: " << lon1 << "\n";
                     }
                 }
                 catch (json::parse_error &e)
@@ -107,56 +93,22 @@ int main()
             lynq1Printed = false; // Clear printed flag for next iteration
         }
 
-        if (m > 0)
-        {
-            chunk2[m] = '\0';
-            buffer2 += chunk2;
 
-            // Parse all complete JSON messages
-            size_t end;
-            while ((end = buffer2.find('}')) != std::string::npos && !lynq2Printed)
-            {
-                std::string message = buffer2.substr(0, end + 1);
-                buffer2.erase(0, end + 1);
+        // if (gotLat1 && gotLat2)
+        // {
+        //     std::cout << "Average Value.\n";
 
-                try
-                {
-                    json j = json::parse(message);
-                    if (j.contains("lat") && j.contains("long") && !lynq2Printed)
-                    {
-                        gotLat2 = true;
-                        lat2 = j["lat"];
-                        lon2 = j["long"];
-                        std::cout << "Latitude 2: " << std::setprecision(10) << lat2
-                                  << ", Longitude 2: " << std::setprecision(10) << lon2 << "\n";
-                        lynq2Printed = true; // Mark as printed
-                    }
-                }
-                catch (json::parse_error &e)
-                {
-                    std::cerr << "JSON parse error (2): " << e.what() << "\n";
-                }
-            }
-            lynq2Printed = false; // Clear printed flag for next iteration
-        }
-
-
-        if (gotLat1 && gotLat2)
-        {
-            std::cout << "Average Value.\n";
-
-            double avgLat = (lat1 + lat2) / 2.0;
-            double avgLon = (lon1 + lon2) / 2.0;
-            std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
-            std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
-        }
+        //     double avgLat = (lat1 + lat2) / 2.0;
+        //     double avgLon = (lon1 + lon2) / 2.0;
+        //     std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
+        //     std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
+        // }
 
         
         std::cout << "\n";
     }
 
     close(serialPort1);
-    close(serialPort2);
     std::cout << "Serial ports closed.\n";
     return 0;
 }
