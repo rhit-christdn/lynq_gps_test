@@ -20,7 +20,6 @@ int main()
         return 1;
     }
 
-
     struct termios tty{};
     if (tcgetattr(serialPort1, &tty) != 0)
     {
@@ -52,21 +51,21 @@ int main()
     std::string buffer1;
     char chunk1[256];
 
+    bool A1updated = false, A2updated = false, A3updated = false;
+    bool B1updated = false, B2updated = false, B3updated = false;
+
+    double A1lat = 0.0, A1lon = 0.0;
+    double A2lat = 0.0, A2lon = 0.0;
+    double A3lat = 0.0, A3lon = 0.0;
+    double B1lat = 0.0, B1lon = 0.0;
+    double B2lat = 0.0, B2lon = 0.0;
+    double B3lat = 0.0, B3lon = 0.0;
+
     while (true)
     {
         int n = read(serialPort1, chunk1, sizeof(chunk1) - 1);
 
-        bool lynq1Printed = false;
         double lat1 = 0.0, lon1 = 0.0;
-        bool A1updated = false, A2updated = false, A3updated = false;
-        bool B1updated = false, B2updated = false, B3updated = false;
-
-        double A1lat = 0.0, A1lon = 0.0;
-        double A2lat = 0.0, A2lon = 0.0;
-        double A3lat = 0.0, A3lon = 0.0;
-        double B1lat = 0.0, B1lon = 0.0;
-        double B2lat = 0.0, B2lon = 0.0;
-        double B3lat = 0.0, B3lon = 0.0;
 
         std::string identity1;
 
@@ -93,39 +92,48 @@ int main()
                         std::cout << "identity 1: " << identity1
                                   << "Latitude 1: " << lat1
                                   << ", Longitude 1: " << lon1 << "\n";
+                        lynq1Printed = true;
+                        
 
-
-
-
-
-
-
-
-                        if (identity1[2] == '@'){
-                            if (identity1[0] == 'A'){
-                                if (identity1[1] == '1'){
+                        if (identity1[2] == '@')
+                        {
+                            if (identity1[0] == 'A')
+                            {
+                                if (identity1[1] == '1')
+                                {
                                     A1updated = true;
                                     A1lat = lat1;
                                     A1lon = lon1;
-                                } else if (identity1[1] == '2'){
+                                }
+                                else if (identity1[1] == '2')
+                                {
                                     A2updated = true;
                                     A2lat = lat1;
                                     A2lon = lon1;
-                                } else if (identity1[1] == '3'){
+                                }
+                                else if (identity1[1] == '3')
+                                {
                                     A3updated = true;
                                     A3lat = lat1;
                                     A3lon = lon1;
                                 }
-                            } else if (identity1[0] == 'B'){
-                                if (identity1[1] == '1'){
+                            }
+                            else if (identity1[0] == 'B')
+                            {
+                                if (identity1[1] == '1')
+                                {
                                     B1updated = true;
                                     B1lat = lat1;
                                     B1lon = lon1;
-                                } else if (identity1[1] == '2'){
+                                }
+                                else if (identity1[1] == '2')
+                                {
                                     B2updated = true;
                                     B2lat = lat1;
                                     B2lon = lon1;
-                                } else if (identity1[1] == '3'){
+                                }
+                                else if (identity1[1] == '3')
+                                {
                                     B3updated = true;
                                     B3lat = lat1;
                                     B3lon = lon1;
@@ -133,20 +141,30 @@ int main()
                             }
                         }
 
-                        if (A1updated && A2updated && A3updated) {
+                        if (A1updated && A2updated && A3updated)
+                        {
                             double avgALat = (A1lat + A2lat + A3lat) / 3.0;
                             double avgALon = (A1lon + A2lon + A3lon) / 3.0;
 
                             std::cout << "Average A: Latitude: " << std::setprecision(10) << avgALat;
                             std::cout << ", Longitude: " << std::setprecision(10) << avgALon << "\n";
+
+                            A1updated = false; // Reset after printing
+                            A2updated = false;
+                            A3updated = false;
                         }
 
-                        if (B1updated && B2updated && B3updated) {
+                        if (B1updated && B2updated && B3updated)
+                        {
                             double avgBLat = (B1lat + B2lat + B3lat) / 3.0;
                             double avgBLon = (B1lon + B2lon + B3lon) / 3.0;
 
                             std::cout << "Average B: Latitude: " << std::setprecision(10) << avgBLat;
                             std::cout << ", Longitude: " << std::setprecision(10) << avgBLon << "\n";
+
+                            B1updated = false; // Reset after printing
+                            B2updated = false;
+                            B3updated = false;
                         }
                     }
                 }
@@ -158,7 +176,6 @@ int main()
             lynq1Printed = false; // Clear printed flag for next iteration
         }
 
-
         // if (gotLat1 && gotLat2)
         // {
         //     std::cout << "Average Value.\n";
@@ -169,7 +186,6 @@ int main()
         //     std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
         // }
 
-        
         std::cout << "\n";
     }
 
