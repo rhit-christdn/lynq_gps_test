@@ -77,7 +77,7 @@ int main()
                     json j = json::parse(message);
                     if (j.contains("identity") && j.contains("lat") && j.contains("long") && !lynq1Printed)
                     {
-                        identity1 = j["identity"].get<std::string>();
+                        identity1 = j["identity"].get<std::string>().c_str();
                         lat1 = j["lat"];
                         lon1 = j["long"];
                         std::cout << "identity 1: " << identity1
