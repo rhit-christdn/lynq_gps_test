@@ -58,7 +58,7 @@ int main()
 
         bool lynq1Printed = false;
         double lat1 = 0.0, lon1 = 0.0;
-        char[64] identity1;
+        char [64] identity1;
 
         if (n > 0)
         {
