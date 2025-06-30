@@ -98,13 +98,15 @@ int main()
                         lat1 = j["lat"];
                         lon1 = j["long"];
 
-                        if (j.contains("No Status"))
+                        if (identity1.find("No Status") != std::string::npos)
                         {
                             NoStatusCount++;
                             count++;
                             std::cout << "No Status: " << NoStatusCount << "\n";
-                            std::cout << std::setprecision(10) << NoStatusCount / count << "\n";
-                        } else {
+                            std::cout << "Ratio: " << std::setprecision(10) << (double)NoStatusCount / count << "\n";
+                        }
+                        else
+                        {
                             count++;
                         }
 
@@ -180,7 +182,6 @@ int main()
                             B3updated = false;
                         }
 
-                        
                         printed = true;
                     }
                 }
@@ -201,7 +202,6 @@ int main()
         //     std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
         //     std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
         // }
-
     }
 
     close(serialPort1);
