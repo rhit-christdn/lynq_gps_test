@@ -51,7 +51,7 @@ int main()
     std::string buffer1;
     char chunk1[256];
 
-    bool lynq1Printed = false;
+    bool printed = false;
 
     // Variables to track updates for A1, A2, A3 and B1, B2, B3
     // These will be used to calculate the average latitude and longitude
@@ -89,16 +89,11 @@ int main()
                 try
                 {
                     json j = json::parse(message);
-                    if (j.contains("identity") && j.contains("lat") && j.contains("long") && !lynq1Printed)
+                    if (j.contains("identity") && j.contains("lat") && j.contains("long") && !printed)
                     {
                         identity1 = j["identity"].get<std::string>();
                         lat1 = j["lat"];
                         lon1 = j["long"];
-                        std::cout << "identity 1: " << identity1
-                                  << "Latitude 1: " << lat1
-                                  << ", Longitude 1: " << lon1 << "\n";
-                        lynq1Printed = true;
-                        
 
                         if (identity1[2] == '@')
                         {
@@ -146,7 +141,7 @@ int main()
                             }
                         }
 
-                        if (A1updated && A2updated && A3updated)
+                        if (A1updated || A2updated || A3updated)
                         {
                             double avgALat = (A1lat + A2lat + A3lat) / 3.0;
                             double avgALon = (A1lon + A2lon + A3lon) / 3.0;
@@ -159,7 +154,7 @@ int main()
                             A3updated = false;
                         }
 
-                        if (B1updated && B2updated && B3updated)
+                        if (B1updated || B2updated || B3updated)
                         {
                             double avgBLat = (B1lat + B2lat + B3lat) / 3.0;
                             double avgBLon = (B1lon + B2lon + B3lon) / 3.0;
@@ -171,6 +166,9 @@ int main()
                             B2updated = false;
                             B3updated = false;
                         }
+
+                        
+                        printed = true;
                     }
                 }
                 catch (json::parse_error &e)
@@ -178,7 +176,7 @@ int main()
                     std::cerr << "JSON parse error (1): " << e.what() << "\n";
                 }
             }
-            lynq1Printed = false; // Clear printed flag for next iteration
+            printed = false; // Clear printed flag for next iteration
         }
 
         // if (gotLat1 && gotLat2)
