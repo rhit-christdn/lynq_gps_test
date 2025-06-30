@@ -58,7 +58,7 @@ int main()
 
         bool lynq1Printed = false;
         double lat1 = 0.0, lon1 = 0.0;
-        char identity1[64];
+        std::string identity1;
 
         if (n > 0)
         {
@@ -77,7 +77,7 @@ int main()
                     json j = json::parse(message);
                     if (j.contains("identity") && j.contains("lat") && j.contains("long") && !lynq1Printed)
                     {
-                        identity1 = j["identity"].get<std::string>().c_str();
+                        identity1 = j["identity"].get<std::string>();
                         lat1 = j["lat"];
                         lon1 = j["long"];
                         std::cout << "identity 1: " << identity1
