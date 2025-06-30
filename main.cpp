@@ -51,6 +51,11 @@ int main()
     std::string buffer1;
     char chunk1[256];
 
+    bool lynq1Printed = false;
+
+    // Variables to track updates for A1, A2, A3 and B1, B2, B3
+    // These will be used to calculate the average latitude and longitude
+    // when all three values are received for each group.
     bool A1updated = false, A2updated = false, A3updated = false;
     bool B1updated = false, B2updated = false, B3updated = false;
 
