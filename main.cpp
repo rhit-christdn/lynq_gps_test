@@ -66,6 +66,9 @@ int main()
     double B2lat = 0.0, B2lon = 0.0;
     double B3lat = 0.0, B3lon = 0.0;
 
+    unsigned int count = 0;
+    unsigned int NoStatusCount = 0;
+
     while (true)
     {
         int n = read(serialPort1, chunk1, sizeof(chunk1) - 1);
@@ -94,6 +97,16 @@ int main()
                         identity1 = j["identity"].get<std::string>();
                         lat1 = j["lat"];
                         lon1 = j["long"];
+
+                        if (j.contains("No Status"))
+                        {
+                            NoStatusCount++;
+                            count++;
+                            std::cout << "No Status: " << NoStatusCount << "\n";
+                            std::cout << std::setprecision(10) << NoStatusCount / count << "\n";
+                        } else {
+                            count++;
+                        }
 
                         if (identity1[2] == '@')
                         {
@@ -189,7 +202,6 @@ int main()
         //     std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
         // }
 
-        std::cout << "\n";
     }
 
     close(serialPort1);
