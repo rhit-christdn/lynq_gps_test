@@ -110,49 +110,46 @@ int main()
                             count++;
                         }
 
-                        if (identity1[2] == '@')
+                        if (identity1[0] == 'A')
                         {
-                            if (identity1[0] == 'A')
+                            if (identity1[1] == '1')
                             {
-                                if (identity1[1] == '1')
-                                {
-                                    A1updated = true;
-                                    A1lat = lat1;
-                                    A1lon = lon1;
-                                }
-                                else if (identity1[1] == '2')
-                                {
-                                    A2updated = true;
-                                    A2lat = lat1;
-                                    A2lon = lon1;
-                                }
-                                else if (identity1[1] == '3')
-                                {
-                                    A3updated = true;
-                                    A3lat = lat1;
-                                    A3lon = lon1;
-                                }
+                                A1updated = true;
+                                A1lat = lat1;
+                                A1lon = lon1;
                             }
-                            else if (identity1[0] == 'B')
+                            else if (identity1[1] == '2')
                             {
-                                if (identity1[1] == '1')
-                                {
-                                    B1updated = true;
-                                    B1lat = lat1;
-                                    B1lon = lon1;
-                                }
-                                else if (identity1[1] == '2')
-                                {
-                                    B2updated = true;
-                                    B2lat = lat1;
-                                    B2lon = lon1;
-                                }
-                                else if (identity1[1] == '3')
-                                {
-                                    B3updated = true;
-                                    B3lat = lat1;
-                                    B3lon = lon1;
-                                }
+                                A2updated = true;
+                                A2lat = lat1;
+                                A2lon = lon1;
+                            }
+                            else if (identity1[1] == '3')
+                            {
+                                A3updated = true;
+                                A3lat = lat1;
+                                A3lon = lon1;
+                            }
+                        }
+                        else if (identity1[0] == 'B')
+                        {
+                            if (identity1[1] == '1')
+                            {
+                                B1updated = true;
+                                B1lat = lat1;
+                                B1lon = lon1;
+                            }
+                            else if (identity1[1] == '2')
+                            {
+                                B2updated = true;
+                                B2lat = lat1;
+                                B2lon = lon1;
+                            }
+                            else if (identity1[1] == '3')
+                            {
+                                B3updated = true;
+                                B3lat = lat1;
+                                B3lon = lon1;
                             }
                         }
 
