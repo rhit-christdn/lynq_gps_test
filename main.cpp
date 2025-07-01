@@ -146,7 +146,7 @@ while (true)
 
                     if (Aupdated)
                     {
-                        std::cout << "Team A info:\n";
+                        std::cout << "\nTeam A info:\n";
                         std::cout << "Members: " << Amembers << "\n";
 
                         double totalLat = 0.0, totalLon = 0.0;
@@ -167,11 +167,13 @@ while (true)
                                       << ", Longitude: " << totalLon / count << "\n";
                         }
                         Aupdated = false;
+
+                        std::cout << "---------------------------------\n";
                     }
 
                     if (Bupdated)
                     {
-                        std::cout << "Team B info:\n";
+                        std::cout << "\nTeam B info:\n";
                         std::cout << "Members: " << Bmembers << "\n";
 
 
@@ -193,6 +195,8 @@ while (true)
                                       << ", Longitude: " << totalLon / count << "\n";
                         }
                         Bupdated = false;
+
+                        std::cout << "---------------------------------\n";
                     }
 
                     // if (identity1[0] == 'A')
