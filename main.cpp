@@ -18,6 +18,15 @@ int main()
     if (serialPort1 < 0)
     {
         std::cerr << "Error opening serial port 1\n";
+
+        const char *portName1 = "dev/ttyACM1";
+        serialPort1 = open(portName1, O_RDONLY | O_NOCTTY);
+
+        if (serialPort1 < 0)
+        {
+            std::cerr << "Error opening serial port 2\n";
+            return 1;
+        }
         return 1;
     }
 
