@@ -62,7 +62,9 @@ int main()
     unsigned int count = 0;
     unsigned int NoStatusCount = 0;
 
-class LatLong public : double latitude;
+struct LatLong
+{
+    double latitude;
     double longitude;
 
     LatLong(double lat = 0.0, double lon = 0.0) : latitude(lat), longitude(lon) {}
