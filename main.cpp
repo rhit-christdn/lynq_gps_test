@@ -152,7 +152,7 @@ int main()
                             double totalLat = 0.0, totalLon = 0.0;
                             for (const auto &pair : ALatLongs)
                             {
-                                std::cout << "Member: " << pair.first
+                                std::cout << "\tMember: " << pair.first
                                           << ", Latitude: " << std::setprecision(10) << pair.second.latitude
                                           << ", Longitude: " << std::setprecision(10) << pair.second.longitude << "\n";
 
