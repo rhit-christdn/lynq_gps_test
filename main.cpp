@@ -137,10 +137,17 @@ while (true)
 
                     if (Aupdated)
                     {
+                        std::cout << "Team A info:\n";
+                        std::cout << "Members: " << Amembers << "\n";
+
                         double totalLat = 0.0, totalLon = 0.0;
                         int count = 0;
                         for (const auto &pair : ALatLongs)
                         {
+                            std::cout << "Member: " << pair.first
+                                      << ", Latitude: " << pair.second.latitude
+                                      << ", Longitude: " << pair.second.longitude << "\n";
+
                             totalLat += pair.second.latitude;
                             totalLon += pair.second.longitude;
                             count++;
