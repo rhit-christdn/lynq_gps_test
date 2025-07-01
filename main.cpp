@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <string>
+#include <unordered_map>
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -51,152 +52,219 @@ int main()
     std::string buffer1;
     char chunk1[256];
 
-    // Variables to track updates for A1, A2, A3 and B1, B2, B3
+    // Variables to track updates for A1, A2, A3... and B1, B2, B3...
     // These will be used to calculate the average latitude and longitude
-    // when all three values are received for each group.
-    bool A1updated = false, A2updated = false, A3updated = false;
-    bool B1updated = false, B2updated = false, B3updated = false;
+    bool Aupdated = false;
+    bool Bupdated = false;
 
-    double A1lat = 0.0, A1lon = 0.0;
-    double A2lat = 0.0, A2lon = 0.0;
-    double A3lat = 0.0, A3lon = 0.0;
-    double B1lat = 0.0, B1lon = 0.0;
-    double B2lat = 0.0, B2lon = 0.0;
-    double B3lat = 0.0, B3lon = 0.0;
+    unsigned int Amembers = 0, Bmembers = 0;
 
     unsigned int count = 0;
     unsigned int NoStatusCount = 0;
 
-    while (true)
+class LatLong public : double latitude;
+    double longitude;
+
+    LatLong(double lat = 0.0, double lon = 0.0) : latitude(lat), longitude(lon) {}
+};
+
+std::unordered_map<std::string, LatLong> ALatLongs;
+std::unordered_map<std::string, LatLong> BLatLongs;
+
+while (true)
+{
+    int n = read(serialPort1, chunk1, sizeof(chunk1) - 1);
+
+    double lat1 = 0.0, lon1 = 0.0;
+
+    std::string identity1;
+
+    if (n > 0)
     {
-        int n = read(serialPort1, chunk1, sizeof(chunk1) - 1);
+        chunk1[n] = '\0';
+        buffer1 += chunk1;
 
-        double lat1 = 0.0, lon1 = 0.0;
-
-        std::string identity1;
-
-        if (n > 0)
+        // Parse all complete JSON messages
+        size_t end;
+        while ((end = buffer1.find('}')) != std::string::npos)
         {
-            chunk1[n] = '\0';
-            buffer1 += chunk1;
+            std::string message = buffer1.substr(0, end + 1);
+            buffer1.erase(0, end + 1);
 
-            // Parse all complete JSON messages
-            size_t end;
-            while ((end = buffer1.find('}')) != std::string::npos)
+            try
             {
-                std::string message = buffer1.substr(0, end + 1);
-                buffer1.erase(0, end + 1);
-
-                try
+                json j = json::parse(message);
+                if (j.contains("identity") && j.contains("lat") && j.contains("long"))
                 {
-                    json j = json::parse(message);
-                    if (j.contains("identity") && j.contains("lat") && j.contains("long"))
+                    identity1 = j["identity"].get<std::string>();
+                    lat1 = j["lat"];
+                    lon1 = j["long"];
+
+                    if (identity1.find("No Status") != std::string::npos)
                     {
-                        identity1 = j["identity"].get<std::string>();
-                        lat1 = j["lat"];
-                        lon1 = j["long"];
-
-                        if (identity1.find("No Status") != std::string::npos)
-                        {
-                            NoStatusCount++;
-                            count++;
-                            std::cout << "No Status: " << NoStatusCount << "\n";
-                            std::cout << "Ratio: " << std::setprecision(10) << (double)NoStatusCount / count << "\n";
-                        }
-                        else
-                        {
-                            count++;
-                        }
-
-                        if (identity1[0] == 'A')
-                        {
-                            if (identity1[1] == '1')
-                            {
-                                A1updated = true;
-                                A1lat = lat1;
-                                A1lon = lon1;
-                            }
-                            else if (identity1[1] == '2')
-                            {
-                                A2updated = true;
-                                A2lat = lat1;
-                                A2lon = lon1;
-                            }
-                            else if (identity1[1] == '3')
-                            {
-                                A3updated = true;
-                                A3lat = lat1;
-                                A3lon = lon1;
-                            }
-                        }
-                        else if (identity1[0] == 'B')
-                        {
-                            if (identity1[1] == '1')
-                            {
-                                B1updated = true;
-                                B1lat = lat1;
-                                B1lon = lon1;
-                            }
-                            else if (identity1[1] == '2')
-                            {
-                                B2updated = true;
-                                B2lat = lat1;
-                                B2lon = lon1;
-                            }
-                            else if (identity1[1] == '3')
-                            {
-                                B3updated = true;
-                                B3lat = lat1;
-                                B3lon = lon1;
-                            }
-                        }
-
-                        if (A1updated || A2updated || A3updated)
-                        {
-                            double avgALat = (A1lat + A2lat + A3lat) / 3.0;
-                            double avgALon = (A1lon + A2lon + A3lon) / 3.0;
-
-                            std::cout << "Average A: Latitude: " << std::setprecision(10) << avgALat;
-                            std::cout << ", Longitude: " << std::setprecision(10) << avgALon << "\n";
-
-                            A1updated = false; // Reset after printing
-                            A2updated = false;
-                            A3updated = false;
-                        }
-
-                        if (B1updated || B2updated || B3updated)
-                        {
-                            double avgBLat = (B1lat + B2lat + B3lat) / 3.0;
-                            double avgBLon = (B1lon + B2lon + B3lon) / 3.0;
-
-                            std::cout << "Average B: Latitude: " << std::setprecision(10) << avgBLat;
-                            std::cout << ", Longitude: " << std::setprecision(10) << avgBLon << "\n";
-
-                            B1updated = false; // Reset after printing
-                            B2updated = false;
-                            B3updated = false;
-                        }
+                        NoStatusCount++;
+                        count++;
+                        std::cout << "No Status: " << NoStatusCount << "\n";
+                        std::cout << "Ratio: " << std::setprecision(10) << (double)NoStatusCount / count << "\n";
                     }
-                }
-                catch (json::parse_error &e)
-                {
-                    std::cerr << "JSON parse error (1): " << e.what() << "\n";
+                    else
+                    {
+                        count++;
+                    }
+
+                    if (identity1[0] == 'A')
+                    {
+                        if (ALatLongs.find(identity1) == ALatLongs.end())
+                        {
+                            Amembers++;
+                            std::cout << "New member " << identity1 << " added to Team A. Total members: " << Amembers << "\n";
+                        }
+                        ALatLongs[identity1] = LatLong(lat1, lon1);
+                        Aupdated = true;
+                    }
+                    else if (identity1[0] == 'B')
+                    {
+                        if (BLatLongs.find(identity1) == BLatLongs.end())
+                        {
+                            Bmembers++;
+                            std::cout << "New member " << identity1 << " added to Team B. Total members: " << Bmembers << "\n";
+                        }
+                        BLatLongs[identity1] = LatLong(lat1, lon1);
+                        Bupdated = true;
+                    }
+
+                    if (Aupdated)
+                    {
+                        double totalLat = 0.0, totalLon = 0.0;
+                        int count = 0;
+                        for (const auto &pair : ALatLongs)
+                        {
+                            totalLat += pair.second.latitude;
+                            totalLon += pair.second.longitude;
+                            count++;
+                        }
+                        if (count > 0)
+                        {
+                            std::cout << "Team A Average -> Latitude: " << totalLat / count
+                                      << ", Longitude: " << totalLon / count << "\n";
+                        }
+                        Aupdated = false;
+                    }
+
+                    if (Bupdated)
+                    {
+                        double totalLat = 0.0, totalLon = 0.0;
+                        int count = 0;
+                        for (const auto &pair : BLatLongs)
+                        {
+                            totalLat += pair.second.latitude;
+                            totalLon += pair.second.longitude;
+                            count++;
+                        }
+                        if (count > 0)
+                        {
+                            std::cout << "Team B Average -> Latitude: " << totalLat / count
+                                      << ", Longitude: " << totalLon / count << "\n";
+                        }
+                        Bupdated = false;
+                    }
+
+                    // if (identity1[0] == 'A')
+                    // {
+                    //     Aupdated = true;
+
+                    //     if (ALatLongs.get(identity1[1]) == nullptr)
+                    //     {
+                    //         Amembers++;
+                    //         std::cout << "New member A" << identity1[1] << ": "
+                    //                   << "Total members: " << Amembers << "\n";
+
+                    //         ALatLongs[identity1[1]] = LatLong();
+                    //     }
+
+                    //     if (identity1[1] == '1')
+                    //     {
+                    //         A1lat = lat1;
+                    //         A1lon = lon1;
+                    //     }
+                    //     else if (identity1[1] == '2')
+                    //     {
+                    //         A2lat = lat1;
+                    //         A2lon = lon1;
+                    //     }
+                    //     else if (identity1[1] == '3')
+                    //     {
+                    //         A3lat = lat1;
+                    //         A3lon = lon1;
+                    //     }
+                    // }
+                    // else if (identity1[0] == 'B')
+                    // {
+                    //     Bupdated = true;
+
+                    //     if (identity1[1] == '1')
+                    //     {
+                    //         B1lat = lat1;
+                    //         B1lon = lon1;
+                    //     }
+                    //     else if (identity1[1] == '2')
+                    //     {
+                    //         B2lat = lat1;
+                    //         B2lon = lon1;
+                    //     }
+                    //     else if (identity1[1] == '3')
+                    //     {
+                    //         B3lat = lat1;
+                    //         B3lon = lon1;
+                    //     }
+                    // }
+
+                    // if (Aupdated)
+                    // {
+                    //     double avgALat = (A1lat + A2lat + A3lat) / 3.0;
+                    //     double avgALon = (A1lon + A2lon + A3lon) / 3.0;
+
+                    //     std::cout << "Average A: Latitude: " << std::setprecision(10) << avgALat;
+                    //     std::cout << ", Longitude: " << std::setprecision(10) << avgALon << "\n";
+
+                    //     A1updated = false; // Reset after printing
+                    //     A2updated = false;
+                    //     A3updated = false;
+                    // }
+
+                    // if (Bupdated)
+                    // {
+                    //     double avgBLat = (B1lat + B2lat + B3lat) / 3.0;
+                    //     double avgBLon = (B1lon + B2lon + B3lon) / 3.0;
+
+                    //     std::cout << "Average B: Latitude: " << std::setprecision(10) << avgBLat;
+                    //     std::cout << ", Longitude: " << std::setprecision(10) << avgBLon << "\n";
+
+                    //     B1updated = false; // Reset after printing
+                    //     B2updated = false;
+                    //     B3updated = false;
+                    // }
                 }
             }
+            catch (json::parse_error &e)
+            {
+                std::cerr << "JSON parse error (1): " << e.what() << "\n";
+            }
         }
-
-        // if (gotLat1 && gotLat2)
-        // {
-        //     std::cout << "Average Value.\n";
-
-        //     double avgLat = (lat1 + lat2) / 2.0;
-        //     double avgLon = (lon1 + lon2) / 2.0;
-        //     std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
-        //     std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
-        // }
     }
 
-    close(serialPort1);
-    std::cout << "Serial ports closed.\n";
-    return 0;
+    // if (gotLat1 && gotLat2)
+    // {
+    //     std::cout << "Average Value.\n";
+
+    //     double avgLat = (lat1 + lat2) / 2.0;
+    //     double avgLon = (lon1 + lon2) / 2.0;
+    //     std::cout << "Avg Longitude: " << std::setprecision(10) << avgLon << "\n";
+    //     std::cout << "Avg Latitude: " << std::setprecision(10) << avgLat << "\n";
+    // }
+}
+
+close(serialPort1);
+std::cout << "Serial ports closed.\n";
+return 0;
 }
