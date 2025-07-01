@@ -159,8 +159,8 @@ int main()
                                 totalLat += pair.second.latitude;
                                 totalLon += pair.second.longitude;
                             }
-                                std::cout << "Team A Average -> Latitude: " << totalLat / Amembers
-                                          << ", Longitude: " << totalLon / Amembers\n";
+                                std::cout << "Team A Average -> Latitude: " << std::setprecision(10) << totalLat / Amembers
+                                          << ", Longitude: " << std::setprecision(10) << totalLon / Amembers << "\n";
                             Aupdated = false;
 
                             std::cout << "---------------------------------\n";
@@ -181,7 +181,7 @@ int main()
                                 totalLat += pair.second.latitude;
                                 totalLon += pair.second.longitude;
                             }
-                            std::cout << "Team B Average -> Latitude: " << tstd::setprecision(10) << totalLat / Bmembers
+                            std::cout << "Team B Average -> Latitude: " << std::setprecision(10) << totalLat / Bmembers
                                       << ", Longitude: " << std::setprecision(10) << totalLon / Bmembers << "\n";
                             Bupdated = false;
 
