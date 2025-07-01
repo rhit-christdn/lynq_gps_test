@@ -51,8 +51,6 @@ int main()
     std::string buffer1;
     char chunk1[256];
 
-    bool printed = false;
-
     // Variables to track updates for A1, A2, A3 and B1, B2, B3
     // These will be used to calculate the average latitude and longitude
     // when all three values are received for each group.
@@ -92,7 +90,7 @@ int main()
                 try
                 {
                     json j = json::parse(message);
-                    if (j.contains("identity") && j.contains("lat") && j.contains("long") && !printed)
+                    if (j.contains("identity") && j.contains("lat") && j.contains("long"))
                     {
                         identity1 = j["identity"].get<std::string>();
                         lat1 = j["lat"];
@@ -178,8 +176,6 @@ int main()
                             B2updated = false;
                             B3updated = false;
                         }
-
-                        printed = true;
                     }
                 }
                 catch (json::parse_error &e)
@@ -187,7 +183,6 @@ int main()
                     std::cerr << "JSON parse error (1): " << e.what() << "\n";
                 }
             }
-            printed = false; // Clear printed flag for next iteration
         }
 
         // if (gotLat1 && gotLat2)
